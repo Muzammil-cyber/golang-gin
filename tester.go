@@ -34,7 +34,7 @@ func printResponse(section string, res *http.Response, body []byte, err error) {
 
 func main() {
 
-	url := "http://localhost:8080/videos"
+	url := "http://localhost:8080/api/videos"
 	method := "GET"
 
 	client := &http.Client{}
@@ -52,9 +52,9 @@ func main() {
 	body, _ := io.ReadAll(res.Body)
 	printResponse("GET /videos", res, body, err)
 
-	url = "http://localhost:8080/videos"
+	url = "http://localhost:8080/api/videos"
 	newID := time.Now().UnixNano()
-	payloadStr := fmt.Sprintf(`{"id": "idx_%d", "title": "First", "description": "some words", "url": "https://link.com", "author": {"name": "Cornell Sanders", "age": 30, "email": "email@gmail.co"}}`, newID)
+	payloadStr := fmt.Sprintf(`{"id": "idx_%d", "title": "Lorem Ipsum", "description": "Lorem ipsum gpsum anfkldasnklfnas masndkasndkas", "url": "https://www.youtube.com/embed/sDJLQMZzzM4", "author": {"name": "Cornell Sanders", "age": 30, "email": "email@gmail.co"}}`, newID)
 	payload := strings.NewReader(payloadStr)
 	req, err = http.NewRequest("POST", url, payload)
 	if err != nil {

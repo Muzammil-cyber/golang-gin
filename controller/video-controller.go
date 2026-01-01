@@ -14,6 +14,7 @@ import (
 type VideoController interface {
 	Save(ctx *gin.Context)
 	GetAll(ctx *gin.Context) []entity.Video
+	ShowAll(ctx *gin.Context)
 }
 
 type controller struct {
@@ -48,4 +49,12 @@ func (c *controller) Save(ctx *gin.Context) {
 
 func (c *controller) GetAll(ctx *gin.Context) []entity.Video {
 	return c.videoService.GetAll()
+}
+
+func (c *controller) ShowAll(ctx *gin.Context) {
+	videos := c.videoService.GetAll()
+	ctx.HTML(http.StatusOK, "index.html", gin.H{
+		"title":  "Video List",
+		"videos": videos,
+	})
 }

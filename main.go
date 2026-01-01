@@ -26,16 +26,28 @@ func main() {
 	setupLogOutput()
 	server := gin.New()
 
-	server.Use(gin.Recovery(), middleware.Logger(), middleware.BasicAuthMiddleware("admin", "password"), gindump.Dump())
+	server.Static("/static", "./templates/static")
+	server.LoadHTMLGlob("templates/*.html")
 
-	server.POST("/videos", func(ctx *gin.Context) {
-		videoController.Save(ctx)
-	})
+	server.Use(gin.Recovery(), middleware.Logger(),
+		middleware.BasicAuthMiddleware("admin", "password"),
+		gindump.Dump())
 
-	server.GET("/videos", func(ctx *gin.Context) {
-		videos := videoController.GetAll(ctx)
-		ctx.JSON(200, videos)
-	})
+	apiRoutes := server.Group("/api")
+	{
+		apiRoutes.POST("/videos",
+			videoController.Save)
+
+		apiRoutes.GET("/videos", func(ctx *gin.Context) {
+			videos := videoController.GetAll(ctx)
+			ctx.JSON(200, videos)
+		})
+	}
+
+	viewRoutes := server.Group("/")
+	{
+		viewRoutes.GET("/", videoController.ShowAll)
+	}
 
 	server.Run(":8080")
 }
