@@ -30,10 +30,9 @@ func main() {
 	server.LoadHTMLGlob("templates/*.html")
 
 	server.Use(gin.Recovery(), middleware.Logger(),
-		middleware.BasicAuthMiddleware("admin", "password"),
 		gindump.Dump())
 
-	apiRoutes := server.Group("/api")
+	apiRoutes := server.Group("/api", middleware.BasicAuthMiddleware("admin", "password"))
 	{
 		apiRoutes.POST("/videos",
 			videoController.Save)
@@ -49,5 +48,12 @@ func main() {
 		viewRoutes.GET("/", videoController.ShowAll)
 	}
 
-	server.Run(":8080")
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		// Elastic Beanstalk sets the default port to 5000
+		port = "5000"
+	}
+
+	server.Run(":" + port)
 }
