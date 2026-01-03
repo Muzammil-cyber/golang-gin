@@ -7,12 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/muzammil-cyber/golang-gin/controller"
 	"github.com/muzammil-cyber/golang-gin/middleware"
+	"github.com/muzammil-cyber/golang-gin/repository"
 	"github.com/muzammil-cyber/golang-gin/service"
 	gindump "github.com/tpkeeper/gin-dump"
 )
 
 var (
-	videoService    service.VideoService       = service.New()
+	videoRepository repository.VideoRepository = repository.NewVideoRepository()
+	videoService    service.VideoService       = service.New(videoRepository)
 	videoController controller.VideoController = controller.New(videoService)
 	jwtService      service.JWTService         = service.NewJWTService()
 	loginService    service.LoginService       = service.NewLoginService()
@@ -52,6 +54,26 @@ func main() {
 		apiRoutes.GET("/videos", func(ctx *gin.Context) {
 			videos := videoController.GetAll(ctx)
 			ctx.JSON(200, videos)
+		})
+		apiRoutes.GET("/videos/:id", func(ctx *gin.Context) {
+			video := videoController.GetByID(ctx)
+			ctx.JSON(200, video)
+		})
+		apiRoutes.PUT("/videos/:id", func(ctx *gin.Context) {
+			updatedVideo := videoController.Update(ctx)
+			ctx.JSON(200, updatedVideo)
+		})
+		apiRoutes.DELETE("/videos/:id", func(ctx *gin.Context) {
+			err := videoController.Delete(ctx)
+			if err != nil {
+				ctx.JSON(500, gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			ctx.JSON(200, gin.H{
+				"message": "Video deleted successfully",
+			})
 		})
 	}
 
