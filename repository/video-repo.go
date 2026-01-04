@@ -7,7 +7,7 @@ import (
 )
 
 type VideoRepository interface {
-	Save(video *entity.Video) error
+	Save(video *entity.Video) (*entity.Video, error)
 	Update(video *entity.Video) error
 	FindByID(id string) (*entity.Video, error)
 	FindAll() ([]entity.Video, error)
@@ -36,8 +36,15 @@ func NewVideoRepository() VideoRepository {
 }
 
 // Implement the methods of VideoRepository interface here
-func (r *videoRepository) Save(video *entity.Video) error {
-	return r.db.Create(video).Error
+func (r *videoRepository) Save(video *entity.Video) (*entity.Video, error) {
+	if err := r.db.Create(video).Error; err != nil {
+		return nil, err
+	}
+	var createdVideo entity.Video
+	if err := r.db.Preload("Author").First(&createdVideo, "id = ?", video.ID).Error; err != nil {
+		return nil, err
+	}
+	return &createdVideo, nil
 }
 
 func (r *videoRepository) Update(video *entity.Video) error {

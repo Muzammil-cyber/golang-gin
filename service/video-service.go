@@ -1,12 +1,13 @@
 package service
 
 import (
+	"github.com/muzammil-cyber/golang-gin/dto"
 	"github.com/muzammil-cyber/golang-gin/entity"
 	"github.com/muzammil-cyber/golang-gin/repository"
 )
 
 type VideoService interface {
-	Save(entity.Video) (entity.Video, error)
+	Save(dto.VideoCreateRequest) (entity.Video, error)
 	GetAll() ([]entity.Video, error)
 	GetByID(string) (*entity.Video, error)
 	Update(entity.Video) (entity.Video, error)
@@ -23,9 +24,18 @@ func New(repo repository.VideoRepository) VideoService {
 	}
 }
 
-func (s *videoService) Save(video entity.Video) (entity.Video, error) {
-	err := s.videos.Save(&video)
-	return video, err
+func (s *videoService) Save(video dto.VideoCreateRequest) (entity.Video, error) {
+	entityVideo := entity.Video{
+		Title:       video.Title,
+		Description: video.Description,
+		URL:         video.URL,
+		Author:      video.Author,
+	}
+	createdVideo, err := s.videos.Save(&entityVideo)
+	if err != nil {
+		return entity.Video{}, err
+	}
+	return *createdVideo, nil
 }
 
 func (s *videoService) GetAll() ([]entity.Video, error) {

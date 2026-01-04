@@ -16,8 +16,8 @@ Key: 'Video.Author.Email' Error:Field validation for 'Email' failed on the 'requ
 //
 
 type ValidationError struct {
-	Key   string `json:"key"`
-	Error string `json:"error"`
+	Key   string `json:"key" example:"Video.Author.Name"`
+	Error string `json:"error" example:"Field validation for 'Name' failed on the 'required' tag"`
 }
 
 func FormatValidationError(errs error) []ValidationError {

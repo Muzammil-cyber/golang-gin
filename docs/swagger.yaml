@@ -1,0 +1,410 @@
+basePath: /api
+definitions:
+  dto.ErrorResponse:
+    properties:
+      error:
+        description: Error message
+        example: Invalid credentials
+        type: string
+    type: object
+  dto.LoginResponse:
+    properties:
+      token:
+        description: JWT token
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  dto.MessageResponse:
+    properties:
+      message:
+        description: Success message
+        example: Video deleted successfully
+        type: string
+    type: object
+  dto.ValidationErrorResponse:
+    properties:
+      errors:
+        description: Validation errors as string
+        items:
+          $ref: '#/definitions/utils.ValidationError'
+        type: array
+    type: object
+  dto.VideoCreateRequest:
+    properties:
+      author:
+        $ref: '#/definitions/entity.Person'
+      description:
+        example: Learn Golang basics
+        maxLength: 500
+        type: string
+      title:
+        example: Introduction to Golang
+        maxLength: 100
+        minLength: 3
+        type: string
+      url:
+        example: https://www.youtube.com/watch?v=abc
+        type: string
+    required:
+    - author
+    - url
+    type: object
+  entity.LoginCredentials:
+    properties:
+      password:
+        description: Password
+        example: password
+        type: string
+      username:
+        description: Username
+        example: admin
+        type: string
+    type: object
+  entity.Person:
+    properties:
+      age:
+        description: Person age (0-120)
+        example: 30
+        maximum: 120
+        minimum: 0
+        type: integer
+      email:
+        description: Person email
+        example: john.doe@example.com
+        type: string
+      name:
+        description: Person name (2-50 characters)
+        example: John Doe
+        maxLength: 50
+        minLength: 2
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  entity.Video:
+    properties:
+      author:
+        allOf:
+        - $ref: '#/definitions/entity.Person'
+        description: Video author
+      description:
+        description: Video description (max 500 characters)
+        example: Learn Golang basics
+        maxLength: 500
+        type: string
+      title:
+        description: Video title (3-100 characters)
+        example: Introduction to Golang
+        maxLength: 100
+        minLength: 3
+        type: string
+      url:
+        description: Video URL
+        example: https://www.youtube.com/watch?v=abc
+        type: string
+    required:
+    - author
+    - url
+    type: object
+  utils.ValidationError:
+    properties:
+      error:
+        example: Field validation for 'Name' failed on the 'required' tag
+        type: string
+      key:
+        example: Video.Author.Name
+        type: string
+    type: object
+host: localhost:5000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support Team
+    url: http://www.swagger.io/support
+  description: A RESTful API for managing video content with user authentication.
+    This API allows you to create, read, update, and delete video entries along with
+    author information. All video endpoints require JWT authentication.
+  license:
+    name: MIT License
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Video Management API
+  version: "1.0"
+paths:
+  /:
+    get:
+      consumes:
+      - text/html
+      description: Display all videos in an HTML template for browser viewing. This
+        endpoint is public and does not require authentication.
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: HTML page displaying all videos
+          schema:
+            type: string
+        "500":
+          description: Internal server error while loading videos
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Show all videos (HTML view)
+      tags:
+      - Views
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with username and password to receive a JWT token
+        for accessing protected endpoints
+      parameters:
+      - description: User login credentials (username and password)
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/entity.LoginCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully authenticated, returns JWT token
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Invalid request format or missing required fields
+          schema:
+            $ref: '#/definitions/dto.ValidationErrorResponse'
+        "401":
+          description: Authentication failed - invalid username or password
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: User Login
+      tags:
+      - Authentication
+  /videos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a complete list of all videos with their author information.
+        Requires JWT authentication.
+      parameters:
+      - default: Bearer <token>
+        description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all videos with author details
+          schema:
+            items:
+              $ref: '#/definitions/entity.Video'
+            type: array
+        "401":
+          description: Unauthorized - valid JWT token required
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error while fetching videos
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all videos
+      tags:
+      - Videos
+    post:
+      consumes:
+      - application/json
+      description: Create a new video entry with associated author information. Requires
+        JWT authentication.
+      parameters:
+      - default: Bearer <token>
+        description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Video object with nested author information
+        in: body
+        name: video
+        required: true
+        schema:
+          $ref: '#/definitions/dto.VideoCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully created video with generated ID
+          schema:
+            $ref: '#/definitions/entity.Video'
+        "400":
+          description: Invalid request format or validation errors
+          schema:
+            $ref: '#/definitions/dto.ValidationErrorResponse'
+        "401":
+          description: Unauthorized - valid JWT token required
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error while saving video
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new video
+      tags:
+      - Videos
+  /videos/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Permanently delete a video by its ID. This action cannot be undone.
+        Requires JWT authentication.
+      parameters:
+      - default: Bearer <token>
+        description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Video UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Video successfully deleted
+          schema:
+            $ref: '#/definitions/dto.MessageResponse'
+        "401":
+          description: Unauthorized - valid JWT token required
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Video not found with provided ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error while deleting video
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a video
+      tags:
+      - Videos
+    get:
+      consumes:
+      - application/json
+      description: Retrieve detailed information for a specific video by its unique
+        ID. Requires JWT authentication.
+      parameters:
+      - default: Bearer <token>
+        description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Video UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Video details with author information
+          schema:
+            $ref: '#/definitions/entity.Video'
+        "401":
+          description: Unauthorized - valid JWT token required
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Video not found with provided ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error while fetching video
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get video by ID
+      tags:
+      - Videos
+    put:
+      consumes:
+      - application/json
+      description: Update an existing video's information by its ID. All fields in
+        the video object can be updated. Requires JWT authentication.
+      parameters:
+      - default: Bearer <token>
+        description: Bearer token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Video UUID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated video object with new information
+        in: body
+        name: video
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Video'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated video
+          schema:
+            $ref: '#/definitions/entity.Video'
+        "400":
+          description: Invalid request format or validation errors
+          schema:
+            $ref: '#/definitions/dto.ValidationErrorResponse'
+        "401":
+          description: Unauthorized - valid JWT token required
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Video not found with provided ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error while updating video
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a video
+      tags:
+      - Videos
+schemes:
+- http
+- https
+securityDefinitions:
+  BearerAuth:
+    description: 'Type "Bearer" followed by a space and JWT token. Example: "Bearer
+      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

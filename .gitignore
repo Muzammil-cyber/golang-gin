@@ -45,6 +45,7 @@ Thumbs.db
 
 # Temporary files
 *.tmp
+tmp/
 
 # Database files
 *.db
