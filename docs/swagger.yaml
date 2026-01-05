@@ -1,4 +1,3 @@
-basePath: /api
 definitions:
   dto.ErrorResponse:
     properties:
@@ -132,58 +131,7 @@ info:
   title: Video Management API
   version: "1.0"
 paths:
-  /:
-    get:
-      consumes:
-      - text/html
-      description: Display all videos in an HTML template for browser viewing. This
-        endpoint is public and does not require authentication.
-      produces:
-      - text/html
-      responses:
-        "200":
-          description: HTML page displaying all videos
-          schema:
-            type: string
-        "500":
-          description: Internal server error while loading videos
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Show all videos (HTML view)
-      tags:
-      - Views
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: Authenticate user with username and password to receive a JWT token
-        for accessing protected endpoints
-      parameters:
-      - description: User login credentials (username and password)
-        in: body
-        name: credentials
-        required: true
-        schema:
-          $ref: '#/definitions/entity.LoginCredentials'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully authenticated, returns JWT token
-          schema:
-            $ref: '#/definitions/dto.LoginResponse'
-        "400":
-          description: Invalid request format or missing required fields
-          schema:
-            $ref: '#/definitions/dto.ValidationErrorResponse'
-        "401":
-          description: Authentication failed - invalid username or password
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: User Login
-      tags:
-      - Authentication
-  /videos:
+  /api/videos:
     get:
       consumes:
       - application/json
@@ -260,7 +208,7 @@ paths:
       summary: Create a new video
       tags:
       - Videos
-  /videos/{id}:
+  /api/videos/{id}:
     delete:
       consumes:
       - application/json
@@ -397,6 +345,57 @@ paths:
       summary: Update a video
       tags:
       - Videos
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with username and password to receive a JWT token
+        for accessing protected endpoints
+      parameters:
+      - description: User login credentials (username and password)
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/entity.LoginCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully authenticated, returns JWT token
+          schema:
+            $ref: '#/definitions/dto.LoginResponse'
+        "400":
+          description: Invalid request format or missing required fields
+          schema:
+            $ref: '#/definitions/dto.ValidationErrorResponse'
+        "401":
+          description: Authentication failed - invalid username or password
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: User Login
+      tags:
+      - Authentication
+  /view/:
+    get:
+      consumes:
+      - text/html
+      description: Display all videos in an HTML template for browser viewing. This
+        endpoint is public and does not require authentication.
+      produces:
+      - text/html
+      responses:
+        "200":
+          description: HTML page displaying all videos
+          schema:
+            type: string
+        "500":
+          description: Internal server error while loading videos
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Show all videos (HTML view)
+      tags:
+      - Views
 schemes:
 - http
 - https

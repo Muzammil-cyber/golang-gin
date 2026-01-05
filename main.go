@@ -2,6 +2,7 @@ package main
 
 import (
 	"io"
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,14 @@ import (
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/muzammil-cyber/golang-gin/graph"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 var (
@@ -46,7 +55,6 @@ func setupLogOutput() {
 // @license.url https://opensource.org/licenses/MIT
 
 // @host localhost:5000
-// @BasePath /api
 // @schemes http https
 
 // @securityDefinitions.apikey BearerAuth
@@ -61,14 +69,14 @@ func main() {
 	server.Use(gin.Recovery(), middleware.Logger(),
 		gindump.Dump())
 
-	server.Static("/static", "./templates/static")
-	server.LoadHTMLGlob("templates/*.html")
+	// server.Static("/static", "./templates/static")
+	// server.LoadHTMLGlob("templates/*.html")
 
 	// swagger
 	server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Public API routes (no JWT required)
-	server.POST("/api/login", func(ctx *gin.Context) {
+	server.POST("/auth/login", func(ctx *gin.Context) {
 		token := loginController.Login(ctx)
 		if token != "" {
 			ctx.JSON(200, dto.LoginResponse{Token: token})
@@ -107,7 +115,7 @@ func main() {
 		})
 	}
 
-	viewRoutes := server.Group("/")
+	viewRoutes := server.Group("/view")
 	{
 		viewRoutes.GET("/", videoController.ShowAll)
 	}
@@ -119,5 +127,36 @@ func main() {
 		port = "5000"
 	}
 
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{
+		Resolvers: &graph.Resolver{
+			VideoService: videoService,
+			JWTService:   jwtService,
+		},
+	}))
+
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+
+	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+
+	srv.Use(extension.Introspection{})
+	srv.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New[string](100),
+	})
+
+	server.GET("/", gin.WrapH(playground.Handler("GraphQL playground", "/query")))
+
+	// GraphQL endpoint for mutations
+	server.POST("/query", func(ctx *gin.Context) {
+		srv.ServeHTTP(ctx.Writer, ctx.Request)
+	})
+
+	// GraphQL queries (GET) can be public or protected based on your needs
+	server.GET("/query", func(ctx *gin.Context) {
+		srv.ServeHTTP(ctx.Writer, ctx.Request)
+	})
+
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	server.Run(":" + port)
 }

@@ -38,7 +38,7 @@ func NewLoginController(loginService service.LoginService, jwtService service.JW
 // @Success 200 {object} dto.LoginResponse "Successfully authenticated, returns JWT token"
 // @Failure 400 {object} dto.ValidationErrorResponse "Invalid request format or missing required fields"
 // @Failure 401 {object} dto.ErrorResponse "Authentication failed - invalid username or password"
-// @Router /login [post]
+// @Router /auth/login [post]
 func (c *loginController) Login(ctx *gin.Context) string {
 	var credentials entity.LoginCredentials
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {

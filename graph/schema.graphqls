@@ -1,0 +1,52 @@
+# GraphQL schema for Video Management API
+#
+# https://gqlgen.com/getting-started/
+
+type Person {
+  id: ID!
+  name: String!
+  age: Int!
+  email: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Video {
+  id: ID!
+  title: String!
+  description: String!
+  url: String!
+  author: Person!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Query {
+  videos: [Video!]!
+  video(id: ID!): Video
+}
+
+input PersonInput {
+  name: String!
+  age: Int!
+  email: String!
+}
+
+input CreateVideoInput {
+  title: String!
+  description: String!
+  url: String!
+  author: PersonInput!
+}
+
+input UpdateVideoInput {
+  title: String
+  description: String
+  url: String
+}
+
+type Mutation {
+  createVideo(input: CreateVideoInput!): Video!
+  updateVideo(id: ID!, input: UpdateVideoInput!): Video!
+  deleteVideo(id: ID!): Boolean!
+}

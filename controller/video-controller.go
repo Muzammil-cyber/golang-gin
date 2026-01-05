@@ -49,7 +49,7 @@ func New(videoService service.VideoService) VideoController {
 // @Failure 401 {object} dto.ErrorResponse "Unauthorized - valid JWT token required"
 // @Failure 500 {object} dto.ErrorResponse "Internal server error while saving video"
 // @Security BearerAuth
-// @Router /videos [post]
+// @Router /api/videos [post]
 func (c *controller) Save(ctx *gin.Context) {
 	var video dto.VideoCreateRequest
 	err := ctx.ShouldBindJSON(&video)
@@ -81,7 +81,7 @@ func (c *controller) Save(ctx *gin.Context) {
 // @Failure 401 {object} dto.ErrorResponse "Unauthorized - valid JWT token required"
 // @Failure 500 {object} dto.ErrorResponse "Internal server error while fetching videos"
 // @Security BearerAuth
-// @Router /videos [get]
+// @Router /api/videos [get]
 func (c *controller) GetAll(ctx *gin.Context) []entity.Video {
 	videos, err := c.videoService.GetAll()
 	if err != nil {
@@ -99,7 +99,7 @@ func (c *controller) GetAll(ctx *gin.Context) []entity.Video {
 // @Produce html
 // @Success 200 {string} html "HTML page displaying all videos"
 // @Failure 500 {object} dto.ErrorResponse "Internal server error while loading videos"
-// @Router / [get]
+// @Router /view/ [get]
 func (c *controller) ShowAll(ctx *gin.Context) {
 	videos, err := c.videoService.GetAll()
 	if err != nil {
@@ -125,7 +125,7 @@ func (c *controller) ShowAll(ctx *gin.Context) {
 // @Failure 404 {object} dto.ErrorResponse "Video not found with provided ID"
 // @Failure 500 {object} dto.ErrorResponse "Internal server error while fetching video"
 // @Security BearerAuth
-// @Router /videos/{id} [get]
+// @Router /api/videos/{id} [get]
 func (c *controller) GetByID(ctx *gin.Context) entity.Video {
 	id := ctx.Param("id")
 	video, err := c.videoService.GetByID(id)
@@ -151,7 +151,7 @@ func (c *controller) GetByID(ctx *gin.Context) entity.Video {
 // @Failure 404 {object} dto.ErrorResponse "Video not found with provided ID"
 // @Failure 500 {object} dto.ErrorResponse "Internal server error while updating video"
 // @Security BearerAuth
-// @Router /videos/{id} [put]
+// @Router /api/videos/{id} [put]
 func (c *controller) Update(ctx *gin.Context) entity.Video {
 	var video entity.Video
 	err := ctx.ShouldBindJSON(&video)
@@ -187,7 +187,7 @@ func (c *controller) Update(ctx *gin.Context) entity.Video {
 // @Failure 404 {object} dto.ErrorResponse "Video not found with provided ID"
 // @Failure 500 {object} dto.ErrorResponse "Internal server error while deleting video"
 // @Security BearerAuth
-// @Router /videos/{id} [delete]
+// @Router /api/videos/{id} [delete]
 func (c *controller) Delete(ctx *gin.Context) error {
 	id := ctx.Param("id")
 	err := c.videoService.Delete(id)

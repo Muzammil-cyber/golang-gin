@@ -20,84 +20,8 @@
         "version": "1.0"
     },
     "host": "localhost:5000",
-    "basePath": "/api",
     "paths": {
-        "/": {
-            "get": {
-                "description": "Display all videos in an HTML template for browser viewing. This endpoint is public and does not require authentication.",
-                "consumes": [
-                    "text/html"
-                ],
-                "produces": [
-                    "text/html"
-                ],
-                "tags": [
-                    "Views"
-                ],
-                "summary": "Show all videos (HTML view)",
-                "responses": {
-                    "200": {
-                        "description": "HTML page displaying all videos",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error while loading videos",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/login": {
-            "post": {
-                "description": "Authenticate user with username and password to receive a JWT token for accessing protected endpoints",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Authentication"
-                ],
-                "summary": "User Login",
-                "parameters": [
-                    {
-                        "description": "User login credentials (username and password)",
-                        "name": "credentials",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/entity.LoginCredentials"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully authenticated, returns JWT token",
-                        "schema": {
-                            "$ref": "#/definitions/dto.LoginResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request format or missing required fields",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ValidationErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Authentication failed - invalid username or password",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/videos": {
+        "/api/videos": {
             "get": {
                 "security": [
                     {
@@ -213,7 +137,7 @@
                 }
             }
         },
-        "/videos/{id}": {
+        "/api/videos/{id}": {
             "get": {
                 "security": [
                     {
@@ -409,6 +333,81 @@
                     },
                     "500": {
                         "description": "Internal server error while deleting video",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "Authenticate user with username and password to receive a JWT token for accessing protected endpoints",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "User Login",
+                "parameters": [
+                    {
+                        "description": "User login credentials (username and password)",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/entity.LoginCredentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully authenticated, returns JWT token",
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format or missing required fields",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ValidationErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication failed - invalid username or password",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/view/": {
+            "get": {
+                "description": "Display all videos in an HTML template for browser viewing. This endpoint is public and does not require authentication.",
+                "consumes": [
+                    "text/html"
+                ],
+                "produces": [
+                    "text/html"
+                ],
+                "tags": [
+                    "Views"
+                ],
+                "summary": "Show all videos (HTML view)",
+                "responses": {
+                    "200": {
+                        "description": "HTML page displaying all videos",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error while loading videos",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
